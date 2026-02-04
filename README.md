@@ -1,77 +1,170 @@
-# PR Roaster - Cyberpunk Terminal
+# 🔥 PR Roaster
 
-A brutally honest PR review tool with a cyberpunk terminal aesthetic. Powered by Google Gemini AI.
+**AI-Powered Code Review Roasting** - Get your pull requests brutally reviewed with sarcasm, specific feedback, and actionable improvements.
 
-## Tech Stack
+![PR Roaster](https://img.shields.io/badge/Roast-Your%20Code-ff0033?style=for-the-badge)
+![Next.js](https://img.shields.io/badge/Next.js-14-black?style=for-the-badge)
+![Express](https://img.shields.io/badge/Express-4.x-green?style=for-the-badge)
+![Gemini AI](https://img.shields.io/badge/Gemini-AI-blue?style=for-the-badge)
 
-- **Next.js 14** - React framework with App Router & Server Actions
-- **TypeScript** - Type safety
-- **Tailwind CSS** - Utility-first styling
-- **Framer Motion** - Animations
-- **Shadcn/UI** - UI component primitives
-- **Lucide React** - Icons
-- **Google Gemini AI** - Code analysis and roasting
+## 🎯 What is PR Roaster?
 
-## Features
+PR Roaster is a cyberpunk-themed web application that analyzes GitHub Pull Requests and delivers brutally honest (but constructive!) code reviews powered by Google Gemini AI.
 
-- 🔥 Cyberpunk terminal UI with neon red accents
-- ⚡ AI-powered code roasting via Gemini
-- 💀 Brutally honest code reviews in three sections:
-  - **THE VERDICT** - One devastating sentence
-  - **THE GRILLING** - Bullet points of logic flaws
-  - **THE PENANCE** - What to fix for redemption
-- 🖥️ Terminal-style input field
-- 🌟 Scanline and noise visual effects
-- 📡 GitHub integration (PRs, files, gists)
+### Features
 
-## Getting Started
+- 🔗 **GitHub PR Analysis** - Paste any public PR URL and we fetch all code changes
+- 🤖 **AI-Powered Roasting** - Gemini AI trained to spot code smells and anti-patterns
+- 🎯 **Specific Feedback** - Get line references, code quotes, and actionable fixes
+- ⚡ **Instant Results** - Get your roast within seconds
+- 🖥️ **Cyberpunk UI** - Terminal-style interface with neon aesthetics
 
-1. Install dependencies:
-   ```bash
-   npm install
-   ```
-
-2. Set up environment variables:
-   ```bash
-   cp .env.example .env.local
-   ```
-   
-   Then edit `.env.local` and add your API keys:
-   - `GEMINI_API_KEY` - Get from [Google AI Studio](https://makersuite.google.com/app/apikey)
-   - `GITHUB_TOKEN` (optional) - For higher rate limits on GitHub API
-
-3. Run the development server:
-   ```bash
-   npm run dev
-   ```
-
-4. Open [http://localhost:3000](http://localhost:3000) in your browser.
-
-## Project Structure
+## 📁 Project Structure
 
 ```
-src/
-├── app/
-│   ├── globals.css      # Global styles with cyberpunk theme
-│   ├── layout.tsx       # Root layout
-│   └── page.tsx         # Landing page
-├── components/
-│   ├── ui/
-│   │   ├── button.tsx   # Shadcn-style button
-│   │   └── input.tsx    # Shadcn-style input
-│   ├── glitch-text.tsx  # Glitchy animated text
-│   ├── roast-button.tsx # Pulsing roast button
-│   └── terminal-input.tsx # Terminal-style input
-└── lib/
-    └── utils.ts         # Utility functions (cn)
+pr-roaster/
+├── frontend/          # Next.js 14 frontend application
+│   ├── src/
+│   │   ├── app/       # Next.js app router pages
+│   │   ├── components/# React components
+│   │   └── lib/       # Utilities and API client
+│   └── package.json
+│
+├── backend/           # Express.js API server
+│   ├── src/
+│   │   ├── routes/    # API routes
+│   │   └── services/  # GitHub & Gemini integrations
+│   └── package.json
+│
+└── README.md
 ```
 
-## Customization
+## 🚀 Getting Started
 
-- **Colors**: Edit `tailwind.config.ts` to modify the neon colors
-- **Animations**: Keyframes defined in Tailwind config and Framer Motion
-- **Fonts**: Uses JetBrains Mono for the terminal aesthetic
+### Prerequisites
 
-## License
+- Node.js 18+ installed
+- Google Gemini API key ([Get one here](https://makersuite.google.com/app/apikey))
+- GitHub Personal Access Token (optional, for higher rate limits)
 
-MIT
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/yourusername/pr-roaster.git
+cd pr-roaster
+```
+
+### 2. Setup Backend
+
+```bash
+cd backend
+
+# Install dependencies
+npm install
+
+# Create environment file
+cp .env.example .env
+
+# Edit .env and add your API keys:
+# GEMINI_API_KEY=your_gemini_api_key
+# GITHUB_TOKEN=your_github_token (optional)
+
+# Start the server
+npm run dev
+```
+
+The backend will run on `http://localhost:3001`
+
+### 3. Setup Frontend
+
+```bash
+cd frontend
+
+# Install dependencies
+npm install
+
+# Start the development server
+npm run dev
+```
+
+The frontend will run on `http://localhost:3000`
+
+### 4. Open in Browser
+
+Visit `http://localhost:3000` to use PR Roaster!
+
+## 🔧 Environment Variables
+
+### Backend (.env)
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `GEMINI_API_KEY` | ✅ Yes | Google Gemini API key |
+| `GITHUB_TOKEN` | ⚠️ Recommended | GitHub PAT for higher rate limits |
+| `PORT` | No | Server port (default: 3001) |
+| `CORS_ORIGIN` | No | Frontend URL (default: http://localhost:3000) |
+
+### Frontend (.env.local)
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `NEXT_PUBLIC_API_URL` | ✅ Yes | Backend API URL (default: http://localhost:3001) |
+
+## 📚 API Reference
+
+### POST /api/roast
+
+Analyze and roast code or a PR.
+
+**Request Body:**
+```json
+{
+  "input": "https://github.com/owner/repo/pull/123"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "roast": "[THE VERDICT]...[THE GRILLING]...[THE PENANCE]...",
+  "metadata": {
+    "title": "PR Title",
+    "author": "username",
+    "additions": 100,
+    "deletions": 50,
+    "changedFiles": 5
+  }
+}
+```
+
+## 🎨 Tech Stack
+
+### Frontend
+- **Framework:** Next.js 14 (App Router)
+- **Styling:** Tailwind CSS
+- **Animations:** Framer Motion
+- **Icons:** Lucide React
+- **Font:** JetBrains Mono
+
+### Backend
+- **Runtime:** Node.js
+- **Framework:** Express.js
+- **GitHub API:** Octokit
+- **AI:** Google Generative AI (Gemini 1.5 Flash)
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## 📝 License
+
+MIT License - feel free to use this project for anything!
+
+## ⚠️ Disclaimer
+
+PR Roaster is meant for entertainment and learning purposes. The roasts are generated by AI and should be taken with humor. Always write good code! 🔥
