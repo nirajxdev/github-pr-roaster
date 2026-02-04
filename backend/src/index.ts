@@ -44,10 +44,10 @@ app.listen(PORT, () => {
   console.log(`
 ╔══════════════════════════════════════════════════════════════╗
 ║                                                              ║
-║   🔥 PR ROASTER API SERVER 🔥                                ║
+║   🔥 PR ROASTER API SERVER 🔥                               ║
 ║                                                              ║
-║   Server running on: http://localhost:${PORT}                   ║
-║   CORS Origin: ${CORS_ORIGIN.padEnd(35)}            ║
+║   Server running on: http://localhost:${PORT}                ║
+║   CORS Origin: ${CORS_ORIGIN.padEnd(35)}                     ║
 ║                                                              ║
 ║   Endpoints:                                                 ║
 ║   - GET  /health     - Health check                          ║
