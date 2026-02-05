@@ -20,7 +20,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="dark">
-      <body className="antialiased bg-background text-foreground font-mono">
+      <body className="antialiased bg-background text-foreground font-sans">
         <div className="noise-bg" />
         <div className="scanlines" />
         {children}

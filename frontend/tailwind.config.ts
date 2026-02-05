@@ -10,20 +10,29 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        background: "#0a0a0a",
-        foreground: "#ededed",
+        background: "#0b0f14",
+        foreground: "#f5f2ea",
+        surface: "#111926",
+        "surface-2": "#161f2f",
+        border: "#263245",
+        muted: "#9aa3b2",
+        accent: "#ff6b4a",
+        "accent-2": "#f4b23f",
+        "accent-3": "#2dd4bf",
         neon: {
-          red: "#ff0033",
-          pink: "#ff3366",
-          dark: "#990022",
+          red: "#ff6b4a",
+          pink: "#f4b23f",
+          dark: "#b14a32",
         },
         terminal: {
-          green: "#00ff41",
-          amber: "#ffb000",
+          green: "#2dd4bf",
+          amber: "#f4b23f",
         },
       },
       fontFamily: {
-        mono: ["JetBrains Mono", "Fira Code", "monospace"],
+        sans: ["Space Grotesk", "ui-sans-serif", "system-ui"],
+        mono: ["IBM Plex Mono", "ui-monospace", "SFMono-Regular", "monospace"],
+        display: ["Space Grotesk", "ui-sans-serif", "system-ui"],
       },
       animation: {
         pulse: "pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite",
@@ -35,10 +44,10 @@ const config: Config = {
       keyframes: {
         glow: {
           "0%": {
-            boxShadow: "0 0 5px #ff0033, 0 0 10px #ff0033, 0 0 15px #ff0033",
+            boxShadow: "0 0 8px rgba(255, 107, 74, 0.35), 0 0 14px rgba(255, 107, 74, 0.3)",
           },
           "100%": {
-            boxShadow: "0 0 10px #ff0033, 0 0 20px #ff0033, 0 0 30px #ff0033, 0 0 40px #ff0033",
+            boxShadow: "0 0 16px rgba(255, 107, 74, 0.45), 0 0 28px rgba(255, 107, 74, 0.4)",
           },
         },
         flicker: {
@@ -51,12 +60,13 @@ const config: Config = {
         },
         blink: {
           "from, to": { borderColor: "transparent" },
-          "50%": { borderColor: "#ff0033" },
+          "50%": { borderColor: "#ff6b4a" },
         },
       },
       boxShadow: {
-        neon: "0 0 5px theme('colors.neon.red'), 0 0 20px theme('colors.neon.red')",
-        "neon-lg": "0 0 10px theme('colors.neon.red'), 0 0 30px theme('colors.neon.red'), 0 0 50px theme('colors.neon.red')",
+        neon: "0 12px 40px rgba(7, 10, 16, 0.35), 0 0 0 1px rgba(255, 107, 74, 0.25)",
+        "neon-lg": "0 20px 60px rgba(7, 10, 16, 0.45), 0 0 0 1px rgba(255, 107, 74, 0.35)",
+        soft: "0 18px 45px rgba(7, 10, 16, 0.4)",
       },
     },
   },

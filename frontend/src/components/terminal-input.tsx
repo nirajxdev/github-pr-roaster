@@ -25,57 +25,46 @@ export function TerminalInput({ value, onChange, onSubmit, isHovered }: Terminal
       transition={{ delay: 0.5, duration: 0.5 }}
       className="relative"
     >
-      {/* Terminal prompt */}
-      <div className="flex items-center gap-2">
-        <span className="text-neon-red font-bold text-lg">~/roaster</span>
-        <span className="text-white">&gt;</span>
+      <div className="flex items-center gap-2 text-sm font-mono text-muted">
+        <span className="text-accent">pr-roaster</span>
+        <span className="text-muted">~/inbox</span>
+        <span className="text-accent-3">$</span>
       </div>
 
-      {/* Input container with glow */}
       <div className="relative mt-3">
         <motion.div
           className={cn(
-            "absolute -inset-0.5 bg-gradient-to-r from-neon-red to-neon-pink rounded-lg blur opacity-30 transition-opacity duration-300",
-            isHovered && "opacity-60"
+            "absolute -inset-0.5 rounded-xl bg-gradient-to-r from-accent/30 via-accent-2/20 to-accent-3/20 blur transition-opacity duration-300",
+            isHovered ? "opacity-70" : "opacity-30"
           )}
           animate={{
-            opacity: isHovered ? [0.4, 0.7, 0.4] : [0.2, 0.4, 0.2],
+            opacity: isHovered ? [0.5, 0.8, 0.5] : [0.25, 0.4, 0.25],
           }}
           transition={{
-            duration: 2,
+            duration: 2.4,
             repeat: Infinity,
             ease: "easeInOut",
           }}
         />
         <Input
           type="url"
-          placeholder="paste_pr_link_here"
+          placeholder="https://github.com/org/repo/pull/123"
           value={value}
           onChange={onChange}
           onKeyDown={handleKeyDown}
           className={cn(
-            "relative w-full h-14 text-lg bg-black/90 border-2 border-neon-red/50",
-            "placeholder:text-gray-600 placeholder:font-mono",
-            "focus:border-neon-red focus:shadow-neon-lg",
+            "relative w-full h-14 text-base bg-surface/90 border border-border/70",
+            "placeholder:text-muted/70 placeholder:font-mono",
+            "focus:border-accent focus:shadow-neon",
             "transition-all duration-300"
           )}
           spellCheck={false}
           autoComplete="off"
         />
-        
-        {/* Blinking cursor overlay when empty */}
-        {!value && (
-          <motion.span
-            className="absolute left-[185px] top-1/2 -translate-y-1/2 w-2 h-6 bg-neon-red pointer-events-none"
-            animate={{ opacity: [1, 0, 1] }}
-            transition={{ duration: 1, repeat: Infinity }}
-          />
-        )}
       </div>
 
-      {/* Helper text */}
-      <p className="mt-2 text-xs text-gray-600 text-left">
-        <span className="text-neon-red/70">$</span> Enter a GitHub PR URL to begin the roast
+      <p className="mt-2 text-xs text-muted">
+        Tip: paste a public GitHub PR URL to start the roast.
       </p>
     </motion.div>
   );

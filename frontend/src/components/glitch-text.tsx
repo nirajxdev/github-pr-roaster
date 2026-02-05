@@ -11,18 +11,17 @@ interface GlitchTextProps {
 export function GlitchText({ text, className }: GlitchTextProps) {
   return (
     <div className={cn("relative inline-block", className)}>
-      {/* Main text */}
       <motion.span
-        className="relative z-10 text-neon-red text-glow"
+        className="relative z-10 text-accent text-glow"
         animate={{
           textShadow: [
-            "0 0 10px #ff0033, 0 0 20px #ff0033, 0 0 30px #ff0033",
-            "0 0 20px #ff0033, 0 0 30px #ff0033, 0 0 40px #ff0033, 0 0 50px #ff0033",
-            "0 0 10px #ff0033, 0 0 20px #ff0033, 0 0 30px #ff0033",
+            "0 0 10px rgba(255, 107, 74, 0.4), 0 0 24px rgba(255, 107, 74, 0.3)",
+            "0 0 14px rgba(255, 107, 74, 0.6), 0 0 32px rgba(255, 107, 74, 0.4)",
+            "0 0 10px rgba(255, 107, 74, 0.4), 0 0 24px rgba(255, 107, 74, 0.3)",
           ],
         }}
         transition={{
-          duration: 2,
+          duration: 2.4,
           repeat: Infinity,
           ease: "easeInOut",
         }}
@@ -30,9 +29,8 @@ export function GlitchText({ text, className }: GlitchTextProps) {
         {text}
       </motion.span>
 
-      {/* Glitch layers */}
       <motion.span
-        className="absolute inset-0 text-cyan-400 opacity-70"
+        className="absolute inset-0 text-accent-3 opacity-70"
         style={{ clipPath: "inset(40% 0 40% 0)" }}
         animate={{
           x: [-2, 2, -2],
@@ -41,7 +39,7 @@ export function GlitchText({ text, className }: GlitchTextProps) {
         transition={{
           duration: 0.2,
           repeat: Infinity,
-          repeatDelay: 3,
+          repeatDelay: 3.4,
           ease: "linear",
         }}
         aria-hidden="true"
@@ -50,7 +48,7 @@ export function GlitchText({ text, className }: GlitchTextProps) {
       </motion.span>
 
       <motion.span
-        className="absolute inset-0 text-neon-pink opacity-70"
+        className="absolute inset-0 text-accent-2 opacity-70"
         style={{ clipPath: "inset(60% 0 10% 0)" }}
         animate={{
           x: [2, -2, 2],
@@ -59,7 +57,7 @@ export function GlitchText({ text, className }: GlitchTextProps) {
         transition={{
           duration: 0.2,
           repeat: Infinity,
-          repeatDelay: 4,
+          repeatDelay: 4.2,
           delay: 0.1,
           ease: "linear",
         }}

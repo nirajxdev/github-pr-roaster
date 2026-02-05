@@ -14,9 +14,9 @@ You MUST format your response in EXACTLY these three sections:
 A single devastating one-sentence summary that captures the essence of their crimes against clean code. Make it memorable, quotable, and slightly painful.
 
 [THE GRILLING]
-• Bullet point 1 - specific flaw with line reference if possible
-• Bullet point 2 - another specific flaw
-• Continue with 3-7 bullet points covering the worst offenses
+- Bullet point 1 - specific flaw with line reference if possible
+- Bullet point 2 - another specific flaw
+- Continue with 3-7 bullet points covering the worst offenses
 (Be specific. Quote the bad code. Mock it appropriately.)
 
 [THE PENANCE]
@@ -27,15 +27,43 @@ A single devastating one-sentence summary that captures the essence of their cri
 
 Remember: You're not here to make friends. You're here to make better developers. The roast should sting, but the advice should genuinely help them improve.`;
 
+const MOCK_ROAST = `[THE VERDICT]
+This PR reads like a speedrun of bad decisions.
+
+[THE GRILLING]
+- Naming is vague enough to double as a mystery novel
+- The logic sprawls across too many responsibilities
+- Error handling looks optional, not intentional
+
+[THE PENANCE]
+1. Split the biggest functions into focused units
+2. Rename variables to match intent, not convenience
+3. Add explicit error handling and actionable messages`;
+
+function shouldUseMock(apiKey?: string | null) {
+  const mode = process.env.ROAST_MODE?.toLowerCase();
+  if (mode === "mock") {
+    return true;
+  }
+  if (!apiKey || apiKey.includes("your_") || apiKey.includes("replace") || apiKey.includes("example")) {
+    return mode === "mock";
+  }
+  return false;
+}
+
 export async function roastCode(input: string): Promise<string> {
-  const apiKey = process.env.GEMINI_API_KEY;
-  
-  if (!apiKey) {
+  const apiKey = process.env.GEMINI_API_KEY?.trim();
+
+  if (shouldUseMock(apiKey)) {
+    return MOCK_ROAST;
+  }
+
+  if (!apiKey || apiKey.includes("your_") || apiKey.includes("replace") || apiKey.includes("example")) {
     throw new Error("GEMINI_API_KEY is not configured. The roasting engine is offline.");
   }
 
   const genAI = new GoogleGenerativeAI(apiKey);
-  
+
   const model = genAI.getGenerativeModel({
     model: "gemini-1.5-flash",
     systemInstruction: SYSTEM_INSTRUCTION,
@@ -51,6 +79,15 @@ ${input}`;
     return response.text();
   } catch (error) {
     console.error("Gemini API Error:", error);
+    if (process.env.ROAST_MODE?.toLowerCase() === "fallback") {
+      return MOCK_ROAST;
+    }
+
+    const message = error instanceof Error ? error.message : String(error);
+    if (/(api key|permission|quota|unauth|forbidden|401|403)/i.test(message)) {
+      throw new Error("Gemini API request failed. Check GEMINI_API_KEY, billing, and model access.");
+    }
+
     throw new Error("The AI roaster had a meltdown. Try again in a moment.");
   }
 }

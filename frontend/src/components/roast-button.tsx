@@ -13,32 +13,31 @@ interface RoastButtonProps {
 
 export function RoastButton({ onClick, disabled, isLoading }: RoastButtonProps) {
   const isInactive = disabled || isLoading;
-  
+
   return (
     <motion.div className="relative inline-block">
-      {/* Animated pulse rings */}
       {!isInactive && (
         <>
           <motion.div
-            className="absolute inset-0 rounded-md bg-neon-red/30"
+            className="absolute inset-0 rounded-xl bg-accent/30"
             animate={{
               scale: [1, 1.5, 1.5],
-              opacity: [0.5, 0, 0],
+              opacity: [0.35, 0, 0],
             }}
             transition={{
-              duration: 2,
+              duration: 2.4,
               repeat: Infinity,
               ease: "easeOut",
             }}
           />
           <motion.div
-            className="absolute inset-0 rounded-md bg-neon-red/20"
+            className="absolute inset-0 rounded-xl bg-accent-2/20"
             animate={{
               scale: [1, 1.8, 1.8],
-              opacity: [0.3, 0, 0],
+              opacity: [0.25, 0, 0],
             }}
             transition={{
-              duration: 2,
+              duration: 2.4,
               repeat: Infinity,
               ease: "easeOut",
               delay: 0.3,
@@ -52,20 +51,20 @@ export function RoastButton({ onClick, disabled, isLoading }: RoastButtonProps) 
         disabled={isInactive}
         size="lg"
         className={cn(
-          "relative px-12 py-6 text-xl font-bold tracking-widest",
-          "bg-gradient-to-r from-neon-red to-neon-pink",
-          "hover:from-neon-pink hover:to-neon-red",
-          "border-2 border-neon-red/50",
+          "relative px-12 py-6 text-base md:text-lg font-semibold tracking-[0.25em] uppercase",
+          "rounded-xl bg-gradient-to-r from-accent to-accent-2 text-white",
+          "hover:from-accent-2 hover:to-accent",
+          "border border-accent/50",
+          "shadow-neon hover:shadow-neon-lg",
           "transition-all duration-300",
           "group",
           isInactive && "opacity-50 cursor-not-allowed grayscale"
         )}
       >
-        {/* Button content */}
         <motion.span
           className="relative z-10 flex items-center gap-3"
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
+          whileHover={{ scale: 1.03 }}
+          whileTap={{ scale: 0.97 }}
         >
           {isLoading ? (
             <>
@@ -73,50 +72,37 @@ export function RoastButton({ onClick, disabled, isLoading }: RoastButtonProps) 
                 animate={{ rotate: 360 }}
                 transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
               >
-                <Loader2 className="w-6 h-6" />
+                <Loader2 className="w-5 h-5" />
               </motion.span>
-              <span>ROASTING...</span>
+              <span>ROASTING</span>
             </>
           ) : (
             <>
               <motion.span
-                animate={!isInactive ? { rotate: [0, 10, -10, 0] } : {}}
-                transition={{ duration: 0.5, repeat: Infinity }}
+                animate={!isInactive ? { rotate: [0, 8, -8, 0] } : {}}
+                transition={{ duration: 0.6, repeat: Infinity }}
               >
-                <Flame className="w-6 h-6" />
+                <Flame className="w-5 h-5" />
               </motion.span>
               <span>ROAST ME</span>
               <motion.span
-                animate={!isInactive ? { 
-                  opacity: [1, 0.5, 1],
-                  scale: [1, 1.2, 1]
-                } : {}}
-                transition={{ duration: 0.8, repeat: Infinity }}
+                animate={!isInactive ? { opacity: [1, 0.6, 1], scale: [1, 1.15, 1] } : {}}
+                transition={{ duration: 1, repeat: Infinity }}
               >
-                <Zap className="w-6 h-6" />
+                <Zap className="w-5 h-5" />
               </motion.span>
             </>
           )}
         </motion.span>
 
-        {/* Inner glow on hover */}
-        <motion.div
-          className="absolute inset-0 rounded-md bg-white/0 group-hover:bg-white/10 transition-colors duration-300"
-        />
+        <motion.div className="absolute inset-0 rounded-xl bg-white/0 group-hover:bg-white/10 transition-colors duration-300" />
       </Button>
 
-      {/* Shadow glow */}
       {!isInactive && (
         <motion.div
-          className="absolute -inset-2 bg-neon-red/20 rounded-lg blur-xl -z-10"
-          animate={{
-            opacity: [0.3, 0.6, 0.3],
-          }}
-          transition={{
-            duration: 2,
-            repeat: Infinity,
-            ease: "easeInOut",
-          }}
+          className="absolute -inset-2 bg-accent/20 rounded-xl blur-xl -z-10"
+          animate={{ opacity: [0.25, 0.5, 0.25] }}
+          transition={{ duration: 2.4, repeat: Infinity, ease: "easeInOut" }}
         />
       )}
     </motion.div>

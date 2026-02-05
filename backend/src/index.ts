@@ -1,10 +1,15 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
+import path from "path";
+import { fileURLToPath } from "url";
 import { roastRouter } from "./routes/roast.js";
 
-// Load environment variables
-dotenv.config();
+// Load environment variables (works from repo root or backend/)
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+dotenv.config({ path: path.resolve(__dirname, "../.env") });
+dotenv.config({ path: path.resolve(__dirname, "../.env.local") });
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -20,10 +25,10 @@ app.use(express.json({ limit: "10mb" }));
 
 // Health check endpoint
 app.get("/health", (req, res) => {
-  res.json({ 
-    status: "ok", 
+  res.json({
+    status: "ok",
     message: "PR Roaster API is running",
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
   });
 });
 
@@ -41,20 +46,14 @@ app.use((err: Error, req: express.Request, res: express.Response, next: express.
 
 // Start server
 app.listen(PORT, () => {
-  console.log(`
-╔══════════════════════════════════════════════════════════════╗
-║                                                              ║
-║   🔥 PR ROASTER API SERVER 🔥                               ║
-║                                                              ║
-║   Server running on: http://localhost:${PORT}                ║
-║   CORS Origin: ${CORS_ORIGIN.padEnd(35)}                     ║
-║                                                              ║
-║   Endpoints:                                                 ║
-║   - GET  /health     - Health check                          ║
-║   - POST /api/roast  - Roast a PR or code                    ║
-║                                                              ║
-╚══════════════════════════════════════════════════════════════╝
-  `);
+  console.log("");
+  console.log("PR ROASTER API SERVER");
+  console.log(`Server: http://localhost:${PORT}`);
+  console.log(`CORS:   ${CORS_ORIGIN}`);
+  console.log("Endpoints:");
+  console.log("  GET  /health");
+  console.log("  POST /api/roast");
+  console.log("");
 });
 
 export default app;
