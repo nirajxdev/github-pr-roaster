@@ -29,11 +29,16 @@ const DEFAULT_ORIGINS = [
 const allowedOrigins = (CORS_ORIGIN ? CORS_ORIGIN.split(",") : DEFAULT_ORIGINS)
   .map((origin) => origin.trim())
   .filter(Boolean);
+const allowAllOrigins = allowedOrigins.length === 0;
 
 // Middleware
 app.use(cors({
   origin: (origin, callback) => {
     if (!origin) {
+      callback(null, true);
+      return;
+    }
+    if (allowAllOrigins) {
       callback(null, true);
       return;
     }
@@ -45,7 +50,7 @@ app.use(cors({
       callback(null, true);
       return;
     }
-    callback(new Error("Not allowed by CORS"));
+    callback(new Error(`Not allowed by CORS: ${origin}`));
   },
   methods: ["GET", "POST"],
   credentials: true,
@@ -67,9 +72,10 @@ app.use("/api", roastRouter);
 // Error handling middleware
 app.use((err: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
   console.error("Server Error:", err);
+  const message = err instanceof Error ? err.message : "Internal server error.";
   res.status(500).json({
     success: false,
-    error: "Internal server error. The roasting engine encountered a problem.",
+    error: message,
   });
 });
 
@@ -78,7 +84,7 @@ app.listen(PORT, () => {
   console.log("");
   console.log("PR ROASTER API SERVER");
   console.log(`Server: http://localhost:${PORT}`);
-  console.log(`CORS:   ${CORS_ORIGIN}`);
+  console.log(`CORS:   ${allowAllOrigins ? "ALLOW_ALL" : CORS_ORIGIN || DEFAULT_ORIGINS.join(", ")}`);
   console.log("Endpoints:");
   console.log("  GET  /health");
   console.log("  POST /api/roast");
