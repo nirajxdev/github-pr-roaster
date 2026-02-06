@@ -5,7 +5,11 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+const API_BASE = process.env.NEXT_PUBLIC_API_URL;
+const useRelativeApi = !API_BASE || /localhost:3001|127\.0\.0\.1:3001/i.test(API_BASE);
+const API_URL = useRelativeApi
+  ? "/api/roast"
+  : `${API_BASE.replace(/\/$/, "")}/api/roast`;
 
 export interface RoastResult {
   success: boolean;
@@ -22,7 +26,7 @@ export interface RoastResult {
 
 export async function roastPR(input: string): Promise<RoastResult> {
   try {
-    const response = await fetch(`${API_URL}/api/roast`, {
+    const response = await fetch(API_URL, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

@@ -40,54 +40,179 @@ This PR reads like a speedrun of bad decisions.
 2. Rename variables to match intent, not convenience
 3. Add explicit error handling and actionable messages`;
 
-function shouldUseMock(apiKey?: string | null) {
+function hasUsableKey(apiKey?: string | null) {
+  if (!apiKey) {
+    return false;
+  }
+  const lowered = apiKey.toLowerCase();
+  return !(lowered.includes("your_") || lowered.includes("replace") || lowered.includes("example"));
+}
+
+type RoastMode = "mock" | "fallback" | "live";
+
+function resolveMode(usableKey: boolean): RoastMode {
   const mode = process.env.ROAST_MODE?.toLowerCase();
-  if (mode === "mock") {
-    return true;
+  if (mode === "mock" || mode === "fallback" || mode === "live") {
+    return mode;
   }
-  if (!apiKey || apiKey.includes("your_") || apiKey.includes("replace") || apiKey.includes("example")) {
-    return mode === "mock";
+  return usableKey ? "live" : "fallback";
+}
+
+const DEFAULT_MODELS = [
+  "gemini-1.5-flash-latest",
+  "gemini-1.5-flash",
+  "gemini-1.5-pro-latest",
+  "gemini-1.5-pro",
+  "gemini-1.0-pro-latest",
+  "gemini-1.0-pro",
+  "gemini-pro",
+];
+
+function getModelCandidates() {
+  const envModel = process.env.GEMINI_MODEL?.trim();
+  const candidates = envModel ? [envModel, ...DEFAULT_MODELS] : DEFAULT_MODELS;
+  return Array.from(new Set(candidates.filter(Boolean)));
+}
+
+function isModelNotFound(error: unknown) {
+  const message = error instanceof Error ? error.message : String(error);
+  return /not found|model.*not.*supported|models\/.+ not found/i.test(message);
+}
+
+type ModelListResponse = {
+  models?: Array<{
+    name?: string;
+    supportedGenerationMethods?: string[];
+  }>;
+};
+
+let cachedModels: { models: string[]; fetchedAt: number } | null = null;
+const MODEL_CACHE_TTL_MS = 15 * 60 * 1000;
+
+async function fetchAvailableModels(apiKey: string): Promise<string[]> {
+  const now = Date.now();
+  if (cachedModels && now - cachedModels.fetchedAt < MODEL_CACHE_TTL_MS) {
+    return cachedModels.models;
   }
-  return false;
+
+  const response = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`
+  );
+
+  if (!response.ok) {
+    const text = await response.text();
+    throw new Error(`Model list request failed (${response.status}): ${text}`);
+  }
+
+  const data = (await response.json()) as ModelListResponse;
+  const models = (data.models || [])
+    .filter((model) => model.supportedGenerationMethods?.includes("generateContent"))
+    .map((model) => model.name || "")
+    .filter(Boolean)
+    .map((name) => name.replace(/^models\//, ""));
+
+  cachedModels = { models, fetchedAt: now };
+  return models;
+}
+
+function rankModels(models: string[]) {
+  const score = (name: string) => {
+    const lower = name.toLowerCase();
+    if (lower.includes("flash")) {
+      return 0;
+    }
+    if (lower.includes("pro")) {
+      return 1;
+    }
+    return 2;
+  };
+  return [...models].sort((a, b) => score(a) - score(b));
+}
+
+export async function listAvailableModels(): Promise<string[]> {
+  const apiKey = process.env.GEMINI_API_KEY?.trim();
+  const usableKey = hasUsableKey(apiKey);
+
+  if (!usableKey || !apiKey) {
+    throw new Error("GEMINI_API_KEY is not configured.");
+  }
+
+  return fetchAvailableModels(apiKey);
 }
 
 export async function roastCode(input: string): Promise<string> {
   const apiKey = process.env.GEMINI_API_KEY?.trim();
+  const usableKey = hasUsableKey(apiKey);
+  const mode = resolveMode(usableKey);
 
-  if (shouldUseMock(apiKey)) {
+  if (mode === "mock" || (!usableKey && mode !== "live")) {
     return MOCK_ROAST;
   }
 
-  if (!apiKey || apiKey.includes("your_") || apiKey.includes("replace") || apiKey.includes("example")) {
+  if (!usableKey || !apiKey) {
     throw new Error("GEMINI_API_KEY is not configured. The roasting engine is offline.");
   }
 
   const genAI = new GoogleGenerativeAI(apiKey);
+  const prompt = `Analyze and roast the following code/PR. Be brutal but constructive:\n\n${input}`;
+  const modelsToTry = getModelCandidates();
 
-  const model = genAI.getGenerativeModel({
-    model: "gemini-1.5-flash",
-    systemInstruction: SYSTEM_INSTRUCTION,
-  });
-
-  const prompt = `Analyze and roast the following code/PR. Be brutal but constructive:
-
-${input}`;
-
-  try {
+  const tryModel = async (modelName: string) => {
+    const model = genAI.getGenerativeModel({
+      model: modelName,
+      systemInstruction: SYSTEM_INSTRUCTION,
+    });
     const result = await model.generateContent(prompt);
     const response = await result.response;
     return response.text();
-  } catch (error) {
-    console.error("Gemini API Error:", error);
-    if (process.env.ROAST_MODE?.toLowerCase() === "fallback") {
-      return MOCK_ROAST;
-    }
+  };
 
-    const message = error instanceof Error ? error.message : String(error);
-    if (/(api key|permission|quota|unauth|forbidden|401|403)/i.test(message)) {
-      throw new Error("Gemini API request failed. Check GEMINI_API_KEY, billing, and model access.");
-    }
+  let lastError: unknown;
 
-    throw new Error("The AI roaster had a meltdown. Try again in a moment.");
+  for (const modelName of modelsToTry) {
+    try {
+      return await tryModel(modelName);
+    } catch (error) {
+      lastError = error;
+      if (!isModelNotFound(error)) {
+        break;
+      }
+    }
   }
+
+  if (isModelNotFound(lastError)) {
+    try {
+      const available = await fetchAvailableModels(apiKey);
+      const ranked = rankModels(available);
+      for (const modelName of ranked) {
+        try {
+          return await tryModel(modelName);
+        } catch (error) {
+          lastError = error;
+          if (!isModelNotFound(error)) {
+            break;
+          }
+        }
+      }
+      if (available.length === 0) {
+        throw new Error("No models with generateContent are available for this API key.");
+      }
+      throw new Error(`No available Gemini model found. Tried: ${ranked.join(", ")}`);
+    } catch (error) {
+      lastError = error;
+    }
+  }
+
+  console.error("Gemini API Error:", lastError);
+
+  if (mode === "fallback") {
+    return MOCK_ROAST;
+  }
+
+  const message = lastError instanceof Error ? lastError.message : String(lastError);
+  if (/(api key|permission|quota|unauth|forbidden|401|403)/i.test(message)) {
+    throw new Error("Gemini API request failed. Check GEMINI_API_KEY, billing, and model access.");
+  }
+
+  throw new Error(`Gemini API error: ${message}`);
 }

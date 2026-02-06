@@ -8,16 +8,45 @@ import { roastRouter } from "./routes/roast.js";
 // Load environment variables (works from repo root or backend/)
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-dotenv.config({ path: path.resolve(__dirname, "../.env") });
-dotenv.config({ path: path.resolve(__dirname, "../.env.local") });
+const backendEnv = path.resolve(__dirname, "../.env");
+const backendEnvLocal = path.resolve(__dirname, "../.env.local");
+const rootEnv = path.resolve(__dirname, "../../.env");
+const rootEnvLocal = path.resolve(__dirname, "../../.env.local");
+dotenv.config({ path: backendEnv });
+dotenv.config({ path: backendEnvLocal });
+dotenv.config({ path: rootEnv });
+dotenv.config({ path: rootEnvLocal });
 
 const app = express();
 const PORT = process.env.PORT || 3001;
-const CORS_ORIGIN = process.env.CORS_ORIGIN || "http://localhost:3000";
+const CORS_ORIGIN = process.env.CORS_ORIGIN || "";
+const DEFAULT_ORIGINS = [
+  "http://localhost:3000",
+  "http://localhost:3002",
+  "http://127.0.0.1:3000",
+  "http://127.0.0.1:3002",
+];
+const allowedOrigins = (CORS_ORIGIN ? CORS_ORIGIN.split(",") : DEFAULT_ORIGINS)
+  .map((origin) => origin.trim())
+  .filter(Boolean);
 
 // Middleware
 app.use(cors({
-  origin: CORS_ORIGIN,
+  origin: (origin, callback) => {
+    if (!origin) {
+      callback(null, true);
+      return;
+    }
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true);
+      return;
+    }
+    if (process.env.NODE_ENV !== "production") {
+      callback(null, true);
+      return;
+    }
+    callback(new Error("Not allowed by CORS"));
+  },
   methods: ["GET", "POST"],
   credentials: true,
 }));

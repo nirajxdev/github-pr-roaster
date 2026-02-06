@@ -1,5 +1,5 @@
 import { Router, Request, Response } from "express";
-import { roastCode } from "../services/gemini.js";
+import { roastCode, listAvailableModels } from "../services/gemini.js";
 import { fetchPRContent, isValidPRUrl } from "../services/github.js";
 
 const router = Router();
@@ -112,6 +112,22 @@ router.post("/roast", async (req: Request, res: Response) => {
       success: false,
       error: error instanceof Error ? error.message : "An unexpected error occurred while roasting.",
     } as RoastResponse);
+  }
+});
+
+router.get("/models", async (_req: Request, res: Response) => {
+  try {
+    const models = await listAvailableModels();
+    return res.json({
+      success: true,
+      models,
+    });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Failed to list models.";
+    return res.status(500).json({
+      success: false,
+      error: message,
+    });
   }
 });
 

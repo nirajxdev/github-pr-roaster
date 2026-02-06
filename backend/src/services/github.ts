@@ -107,7 +107,7 @@ export async function fetchPRContent(prUrl: string): Promise<PRFetchResult> {
     const contentParts: string[] = [
       `# Pull Request: ${pr.title}`,
       `## Author: @${pr.user?.login || "unknown"}`,
-      `## Branch: ${pr.head.ref} → ${pr.base.ref}`,
+      `## Branch: ${pr.head.ref} -> ${pr.base.ref}`,
       `## Stats: +${pr.additions} additions, -${pr.deletions} deletions, ${pr.changed_files} files changed`,
       "",
       "---",
@@ -208,3 +208,4 @@ export async function fetchPRContent(prUrl: string): Promise<PRFetchResult> {
 export function isValidPRUrl(url: string): boolean {
   return parsePRUrl(url) !== null;
 }
+
