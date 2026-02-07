@@ -80,7 +80,7 @@ app.use((err: Error, req: express.Request, res: express.Response, next: express.
 });
 
 // Start server
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   console.log("");
   console.log("PR ROASTER API SERVER");
   console.log(`Server: http://localhost:${PORT}`);
@@ -89,6 +89,23 @@ app.listen(PORT, () => {
   console.log("  GET  /health");
   console.log("  POST /api/roast");
   console.log("");
+});
+
+server.on("error", (error: NodeJS.ErrnoException) => {
+  if (error.code === "EADDRINUSE") {
+    console.error(`Port ${PORT} is already in use.`);
+    console.error("Stop the other process or set PORT in backend/.env to a free port.");
+    process.exit(1);
+  }
+
+  if (error.code === "EACCES") {
+    console.error(`Insufficient permissions to bind to port ${PORT}.`);
+    console.error("Try a higher port like 3001+ or run with elevated permissions.");
+    process.exit(1);
+  }
+
+  console.error("Server failed to start:", error);
+  process.exit(1);
 });
 
 export default app;

@@ -27,6 +27,35 @@ A single devastating one-sentence summary that captures the essence of their cri
 
 Remember: You're not here to make friends. You're here to make better developers. The roast should sting, but the advice should genuinely help them improve.`;
 
+const DEFAULT_TIMEOUT_MS = 20000;
+
+function getTimeoutMs(): number {
+  const raw = process.env.GEMINI_TIMEOUT_MS?.trim();
+  if (!raw) {
+    return DEFAULT_TIMEOUT_MS;
+  }
+  const parsed = Number(raw);
+  if (!Number.isFinite(parsed) || parsed <= 0) {
+    return DEFAULT_TIMEOUT_MS;
+  }
+  return parsed;
+}
+
+async function fetchWithTimeout(url: string, timeoutMs: number): Promise<Response> {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    return await fetch(url, { signal: controller.signal });
+  } catch (error) {
+    if (error instanceof Error && error.name === "AbortError") {
+      throw new Error(`Request timed out after ${timeoutMs}ms.`);
+    }
+    throw error;
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
+
 const MOCK_ROAST = `[THE VERDICT]
 This PR reads like a speedrun of bad decisions.
 
@@ -95,8 +124,9 @@ async function fetchAvailableModels(apiKey: string): Promise<string[]> {
     return cachedModels.models;
   }
 
-  const response = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`
+  const response = await fetchWithTimeout(
+    `https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`,
+    getTimeoutMs()
   );
 
   if (!response.ok) {
@@ -144,6 +174,7 @@ export async function roastCode(input: string): Promise<string> {
   const apiKey = process.env.GEMINI_API_KEY?.trim();
   const usableKey = hasUsableKey(apiKey);
   const mode = resolveMode(usableKey);
+  const requestTimeoutMs = getTimeoutMs();
 
   if (mode === "mock" || (!usableKey && mode !== "live")) {
     return MOCK_ROAST;
@@ -158,11 +189,14 @@ export async function roastCode(input: string): Promise<string> {
   const modelsToTry = getModelCandidates();
 
   const tryModel = async (modelName: string) => {
-    const model = genAI.getGenerativeModel({
-      model: modelName,
-      systemInstruction: SYSTEM_INSTRUCTION,
-    });
-    const result = await model.generateContent(prompt);
+    const model = genAI.getGenerativeModel(
+      {
+        model: modelName,
+        systemInstruction: SYSTEM_INSTRUCTION,
+      },
+      { timeout: requestTimeoutMs }
+    );
+    const result = await model.generateContent(prompt, { timeout: requestTimeoutMs });
     const response = await result.response;
     return response.text();
   };
